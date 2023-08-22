@@ -1,18 +1,44 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './App.css';
+import AppRoutes from 'components/app-routes';
+import { Experimental_CssVarsProvider as CssVarsProvider } from '@mui/material/styles';
+import { CssBaseline, PaletteOptions, experimental_extendTheme } from '@mui/material';
+import { lightThemeColor, darkThemeColor } from './common/theme/colors';
+import { useSelector } from 'react-redux';
 
 function App() {
+    const currentTheme = useSelector((state: any) => state.theme.currentTheme);
+
+    useEffect(() => {
+        document.documentElement.setAttribute('data-mui-color-scheme', currentTheme);
+    }, []);
+
+    const theme = experimental_extendTheme({
+        colorSchemes: {
+            light: {
+                palette: lightThemeColor as PaletteOptions,
+            },
+            dark: {
+                palette: darkThemeColor as PaletteOptions,
+            },
+        },
+        shape: {
+            borderRadius: 6,
+        },
+        typography: {
+            fontFamily: 'Inter',
+            button: {
+                textTransform: 'none',
+            },
+        },
+    });
     return (
-        <div className="App">
-            <header className="App-header">
-                <p>
-                    Edit <code>src/App.tsx</code> and save to reload.
-                </p>
-                <a className="App-link" href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
-                    Learn React
-                </a>
-            </header>
-        </div>
+        <CssVarsProvider theme={theme}>
+            <CssBaseline />
+            <div className="App">
+                <AppRoutes />
+            </div>
+        </CssVarsProvider>
     );
 }
 
