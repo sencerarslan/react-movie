@@ -25,7 +25,7 @@ module.exports = {
     },
     plugins: ['jsx-a11y', 'prettier', 'import'],
     rules: {
-        'no-console': 'warn', // console.log gibi ifadeleri uyarı olarak göster
+        'no-console': 'off', // console.log gibi ifadeleri uyarı olarak göster
         'no-unused-vars': 'warn', // Kullanılmayan değişkenleri uyarı olarak göster
 
         // TypeScript ile İlgili Kural Ayarları
@@ -35,7 +35,15 @@ module.exports = {
         '@typescript-eslint/no-unused-vars': 'warn', // Kullanılmayan değişkenleri TypeScript düzeyinde uyarı olarak göster
 
         // Prettier ile Çakışmayı Önlemek İçin
-        'prettier/prettier': ['error', { singleQuote: true, trailingComma: 'all', endOfLine: 'auto', printWidth: 120 }],
+        'prettier/prettier': [
+            'error',
+            {
+                singleQuote: true,
+                trailingComma: 'all',
+                endOfLine: 'auto',
+                printWidth: 120,
+            },
+        ],
         'array-bracket-spacing': ['error', 'never'],
         semi: ['error', 'always'],
     },

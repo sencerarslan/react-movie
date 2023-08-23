@@ -1,29 +1,29 @@
-import {
-    FormControl,
-    FormControlLabel,
-    FormLabel,
-    Radio,
-    RadioGroup,
-    ToggleButton,
-    ToggleButtonGroup,
-} from '@mui/material';
+import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { PageStyled } from './index.styles';
 import { DatePicker } from '@mui/x-date-pickers';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import moment from 'moment';
-import { Check, CheckBox } from '@mui/icons-material';
-import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { setFilterDate, setFilterType, setPage } from 'store/reducers/searchReducer';
 
-export default function FilterBar(props: any) {
+export default function FilterBar() {
+    const dispatch = useDispatch();
+    const { filterType, filterDate } = useSelector((state: any) => state.search);
+
     const maxDate = moment();
-    const minDate = moment().add(-50, 'year');
 
-    const [movieType, setMovieType] = useState<string>('');
-    const handleChange = (event: React.MouseEvent<HTMLElement>, value: string) => {
-        setMovieType(value);
+    const handleTypeChange = (event: React.MouseEvent<HTMLElement>, value: string) => {
+        dispatch(setFilterType(value));
+        dispatch(setPage('1'));
     };
-    const filterType = [
+    const handleDateChange = (value: any, err: any) => {
+        if (!err.validationError) {
+            dispatch(setFilterDate(value ? moment(value).format('YYYY') : ''));
+            dispatch(setPage('1'));
+        }
+    };
+    const filterTypeList = [
         { label: 'Movie', value: 'movie' },
         { label: 'Series', value: 'series' },
         { label: 'Episode', value: 'episode' },
@@ -33,17 +33,25 @@ export default function FilterBar(props: any) {
             <>
                 <div className="filter-box">
                     <LocalizationProvider dateAdapter={AdapterMoment}>
-                        <DatePicker label={'Year'} views={['year']} openTo="year" minDate={minDate} maxDate={maxDate} />
+                        <DatePicker
+                            slotProps={{
+                                actionBar: {
+                                    actions: ['clear'],
+                                },
+                            }}
+                            label={'Year'}
+                            views={['year']}
+                            openTo="year"
+                            value={filterDate ? moment(filterDate) : undefined}
+                            maxDate={maxDate}
+                            onChange={(value: any, err: any) => {
+                                handleDateChange(value, err);
+                            }}
+                        />
                     </LocalizationProvider>
 
-                    <ToggleButtonGroup
-                        color="primary"
-                        value={movieType}
-                        exclusive
-                        onChange={handleChange}
-                        aria-label="Platform"
-                    >
-                        {filterType.map((item: any, index: number) => (
+                    <ToggleButtonGroup color="primary" value={filterType} exclusive onChange={handleTypeChange}>
+                        {filterTypeList.map((item: any, index: number) => (
                             <ToggleButton key={index} value={item.value}>
                                 {item.label}
                             </ToggleButton>
