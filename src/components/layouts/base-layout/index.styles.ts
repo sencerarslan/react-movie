@@ -2,6 +2,7 @@ import styled from 'styled-components';
 
 export const BaseLayoutStyled = styled.div`
     .page {
+        position: relative;
         display: flex;
         flex-wrap: nowrap;
         justify-content: space-between;

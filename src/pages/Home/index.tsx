@@ -1,6 +1,4 @@
-import SearchBar from 'widgets/search-bar';
 import { Styled } from './index.styles';
-import FilterBar from 'widgets/filter-bar';
 import { useCallback, useEffect, useState } from 'react';
 import omdbService from 'services/omdb/index.api';
 import {
@@ -18,11 +16,15 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { Loading } from 'components/loading';
 import { setPage } from 'store/reducers/searchReducer';
+import { SentimentDissatisfied } from '@mui/icons-material';
+import { routesPaths } from 'config/routes';
+import { useNavigate } from 'react-router-dom';
 
 export interface HomePageProps {}
 
 const HomePage = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { filterType, filterDate, searchText, page } = useSelector((state: any) => state.search);
 
     const [loadingState, setLoadingState] = useState<boolean>(true);
@@ -35,12 +37,11 @@ const HomePage = () => {
         setLoadingState(false);
         setErr('');
         await omdbService
-            .Movie({ search: searchText, type: filterType, date: filterDate, page: page })
+            .AllMovie({ search: searchText, type: filterType, date: filterDate, page: page })
             .then((res: any) => {
                 if (res.Response === 'True') {
                     const tempPage = Math.ceil(Number(res.totalResults) / 10);
                     setTotalPage(tempPage);
-                    console.log(res.Search);
                     setList(res.Search);
                     setLoadingState(true);
                 } else {
@@ -48,8 +49,7 @@ const HomePage = () => {
                     setLoadingState(true);
                 }
             })
-            .catch((err: any) => {
-                console.error('err:', err);
+            .catch(() => {
                 setLoadingState(true);
             });
     }, [page, searchText, filterType, filterDate]);
@@ -60,7 +60,6 @@ const HomePage = () => {
         { label: 'IMDB ID', minWidth: 0 },
     ];
     const handlePage = (e: any) => {
-        console.log(e);
         dispatch(setPage(e));
     };
 
@@ -70,17 +69,19 @@ const HomePage = () => {
 
     return (
         <Styled>
-            <SearchBar />
-            <FilterBar />
-
             {loadingState ? (
                 <>
                     {err ? (
-                        <h1>{err}</h1>
+                        <div className="empty-data">
+                            <div className="content">
+                                <SentimentDissatisfied />
+                                <div>{err}</div>
+                            </div>
+                        </div>
                     ) : (
-                        <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+                        <Paper>
                             <TableContainer>
-                                <Table stickyHeader>
+                                <Table className="custom-table" stickyHeader>
                                     <TableHead>
                                         <TableRow>
                                             {columns.map((column: any, index: number) => (
@@ -93,10 +94,25 @@ const HomePage = () => {
                                     <TableBody>
                                         {list.map((item: any, index: number) => {
                                             return (
-                                                <TableRow hover tabIndex={-1} key={index}>
+                                                <TableRow
+                                                    onClick={() => {
+                                                        navigate(`${routesPaths.base}${item.imdbID}`);
+                                                    }}
+                                                    hover
+                                                    tabIndex={-1}
+                                                    key={index}
+                                                >
                                                     <TableCell>
                                                         <div className="mini-card">
-                                                            <img src={item.Poster} alt={item.Title} className="image" />
+                                                            <img
+                                                                src={
+                                                                    item.Poster !== 'N/A'
+                                                                        ? item.Poster
+                                                                        : '/assets/images/no-image.svg'
+                                                                }
+                                                                alt={item.Title}
+                                                                className="image"
+                                                            />
                                                             <div className="content">
                                                                 <div className="category">
                                                                     <Chip
@@ -126,6 +142,7 @@ const HomePage = () => {
                                 </Table>
                             </TableContainer>
                             <Pagination
+                                className="custom-pagination"
                                 page={Number(page)}
                                 count={totalPage}
                                 onChange={(event, page) => handlePage(page)}
